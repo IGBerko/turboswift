@@ -1,2 +1,0 @@
-
-@MainActor public func mainActorFunction() {}

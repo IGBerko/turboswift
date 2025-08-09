@@ -1,4 +1,0 @@
-module NoSwiftifyClang {
-    header "objc-no-swiftify.h"
-    export *
-}

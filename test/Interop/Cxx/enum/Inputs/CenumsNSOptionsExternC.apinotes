@@ -1,9 +1,0 @@
-Name: CenumsNSOptionsExternC
-Tags:
-- Name: UIPrinterJobTypes
-  SwiftName: UIPrinter.JobTypes
-SwiftVersions:
-- Version: 4
-  Tags:
-  - Name: UIPrinterJobTypes
-    SwiftName: UIPrinterJobTypes
