@@ -1,39 +1,77 @@
 using System;
-using System.IO;
+using System.Collections.Generic;
 
-class Turbalance
+namespace TurbalanceDebug
 {
-    // Простейший "парсер", который на входе получает код TurboSwift,
-    // и генерирует Python-функцию check_syntax, которая проверяет простое правило.
-    static void Main(string[] args)
+    public class Turbalance
     {
-        if (args.Length < 2)
+        // Метод проверки синтаксиса Turbalance
+        public List<string> CheckSyntax(string code)
         {
-            Console.WriteLine("Usage: turbalance.exe <input.ts> <output.py>");
-            return;
+            List<string> errors = new List<string>();
+            Stack<int> braceStack = new Stack<int>();
+            string[] lines = code.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i];
+                for (int j = 0; j < line.Length; j++)
+                {
+                    if (line[j] == '{')
+                    {
+                        braceStack.Push(i + 1);
+                    }
+                    else if (line[j] == '}')
+                    {
+                        if (braceStack.Count == 0)
+                        {
+                            errors.Add($"[TURBALANCE] Line {i + 1}: Extra '}}'");
+                        }
+                        else
+                        {
+                            braceStack.Pop();
+                        }
+                    }
+                }
+
+                string trimmed = line.Trim();
+                if (trimmed.StartsWith("contract") && !trimmed.Contains("{"))
+                {
+                    errors.Add($"[TURBALANCE] Line {i + 1}: Expected '{{' after 'contract'");
+                }
+
+                if (trimmed.StartsWith("import") && trimmed.Contains("aka") && !trimmed.EndsWith(";"))
+                {
+                    errors.Add($"[TURBALANCE] Line {i + 1}: Import statement must end with ';'");
+                }
+
+                // Можно добавить другие проверки по необходимости
+            }
+
+            while (braceStack.Count > 0)
+            {
+                int lineNum = braceStack.Pop();
+                errors.Add($"[TURBALANCE] Line {lineNum}: Unclosed '{{'");
+            }
+
+            return errors;
         }
 
-        string inputFile = args[0];
-        string outputFile = args[1];
-
-        string code = File.ReadAllText(inputFile);
-
-        // Простая проверка: есть ли слово "contract"
-        bool hasContract = code.Contains("contract");
-
-        using (StreamWriter sw = new StreamWriter(outputFile))
+        // Пример вызова проверки
+        public void RunCheck(string code)
         {
-            sw.WriteLine("def check_syntax(code):");
-            if (!hasContract)
+            var errors = CheckSyntax(code);
+            if (errors.Count == 0)
             {
-                sw.WriteLine("    return [\"Missing 'contract' keyword\"]");
+                Console.WriteLine("No syntax errors found.");
             }
             else
             {
-                sw.WriteLine("    return []");
+                foreach (var err in errors)
+                {
+                    Console.WriteLine(err);
+                }
             }
         }
-
-        Console.WriteLine($"Generated {outputFile} from {inputFile}");
     }
 }
